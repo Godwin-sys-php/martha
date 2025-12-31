@@ -22,6 +22,9 @@
 
         html {
             scroll-behavior: smooth;
+            /* Scroll snap sur le conteneur principal */
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
         }
 
         body {
@@ -54,12 +57,16 @@
         ============================================ */
         section {
             min-height: 100vh;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 80px 120px;
             position: relative;
+            /* Snap scroll - chaque section s'ancre */
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
         }
 
         .content-wrapper {
@@ -284,7 +291,8 @@
         ============================================ */
         #section-5 {
             background: linear-gradient(180deg, #f5f3ef 0%, #f0ebe4 100%);
-            padding: 80px 60px;
+            padding: 60px 60px;
+            overflow: hidden;
         }
 
         .memories-container {
@@ -331,7 +339,6 @@
         ============================================ */
         #section-6 {
             background-color: #f0ebe4;
-            min-height: 100vh;
         }
 
         .declaration {
@@ -372,7 +379,8 @@
         ============================================ */
         #section-7 {
             background: linear-gradient(180deg, #f0ebe4 0%, #ebe5dc 100%);
-            padding: 80px 60px;
+            padding: 60px 60px;
+            overflow: hidden;
         }
 
         .future-container {
@@ -420,8 +428,7 @@
         ============================================ */
         #section-8 {
             background-color: #ebe5dc;
-            min-height: 100vh;
-            padding-bottom: 120px;
+            overflow: hidden;
         }
 
         .gratitude-container {
@@ -552,6 +559,8 @@
         @media (max-width: 1024px) {
             section {
                 padding: 60px 60px;
+                height: 100vh;
+                overflow-y: auto;
             }
 
             .memories-container,
@@ -575,8 +584,14 @@
         }
 
         @media (max-width: 768px) {
+            html {
+                scroll-snap-type: y proximity;
+            }
+
             section {
                 padding: 50px 30px;
+                height: auto;
+                min-height: 100vh;
             }
 
             .title-main {
@@ -621,12 +636,69 @@
             z-index: 1000;
             transition: width 0.1s ease-out;
         }
+
+        /* ============================================
+           NAVIGATION DOTS
+        ============================================ */
+        .section-nav {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            z-index: 1000;
+        }
+
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.15);
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .nav-dot:hover {
+            background-color: rgba(0, 0, 0, 0.35);
+            transform: scale(1.3);
+        }
+
+        .nav-dot.active {
+            background-color: #9d7b4a;
+            transform: scale(1.4);
+        }
+
+        @media (max-width: 768px) {
+            .section-nav {
+                right: 15px;
+                gap: 10px;
+            }
+
+            .nav-dot {
+                width: 8px;
+                height: 8px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <!-- Barre de progression -->
     <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Navigation dots -->
+    <nav class="section-nav" id="sectionNav">
+        <a href="#section-1" class="nav-dot active" data-section="1"></a>
+        <a href="#section-2" class="nav-dot" data-section="2"></a>
+        <a href="#section-3" class="nav-dot" data-section="3"></a>
+        <a href="#section-4" class="nav-dot" data-section="4"></a>
+        <a href="#section-5" class="nav-dot" data-section="5"></a>
+        <a href="#section-6" class="nav-dot" data-section="6"></a>
+        <a href="#section-7" class="nav-dot" data-section="7"></a>
+        <a href="#section-8" class="nav-dot" data-section="8"></a>
+    </nav>
 
     <!-- ============================================
          SECTION 1 - MON AMOUR
@@ -722,7 +794,7 @@
             <div class="fade-in delay-3 parallax-slow">
                 <!-- IMAGE 1 -->
                 <div class="image-placeholder img-portrait image-offset-right image-float">
-                    <!-- <img src="votre-image-1.jpg" alt=""> -->
+                    <img src="first.jpg" alt="Notre moment">
                 </div>
             </div>
         </div>
@@ -753,11 +825,11 @@
             <div class="future-images">
                 <!-- IMAGE 2 -->
                 <div class="image-placeholder img-landscape fade-in delay-1 image-offset-left parallax-slow">
-                    <!-- <img src="votre-image-2.jpg" alt=""> -->
+                    <img src="second.JPG" alt="Notre avenir">
                 </div>
                 <!-- IMAGE 3 -->
                 <div class="image-placeholder img-square fade-in delay-3 parallax-slow">
-                    <!-- <img src="votre-image-3.jpg" alt=""> -->
+                    <img src="third.JPG" alt="Ensemble">
                 </div>
             </div>
             <div class="text-future">
@@ -791,11 +863,11 @@
             <div class="final-images">
                 <!-- IMAGE 4 -->
                 <div class="image-placeholder img-small fade-in delay-4 image-offset-left">
-                    <!-- <img src="votre-image-4.jpg" alt=""> -->
+                    <img src="last.jpg" alt="Nous">
                 </div>
                 <!-- IMAGE 5 -->
                 <div class="image-placeholder img-small fade-in delay-5 image-offset-right">
-                    <!-- <img src="votre-image-5.jpg" alt=""> -->
+                    <img src="last2.jpg" alt="Pour toujours">
                 </div>
             </div>
         </div>
@@ -811,13 +883,16 @@
         const observerOptions = {
             root: null,
             rootMargin: '0px',
-            threshold: 0.15
+            threshold: 0.1
         };
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
+                    // Petit délai pour laisser le snap se terminer
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, 100);
                 }
             });
         }, observerOptions);
@@ -872,6 +947,37 @@
                     });
                 }
             });
+        });
+
+        // ============================================
+        // Navigation dots - mise à jour active
+        // ============================================
+        const sections = document.querySelectorAll('section');
+        const navDots = document.querySelectorAll('.nav-dot');
+
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const sectionId = entry.target.id;
+                    const sectionNumber = sectionId.split('-')[1];
+
+                    // Mettre à jour les dots
+                    navDots.forEach(dot => {
+                        dot.classList.remove('active');
+                        if (dot.dataset.section === sectionNumber) {
+                            dot.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.5
+        });
+
+        sections.forEach(section => {
+            sectionObserver.observe(section);
         });
     </script>
 

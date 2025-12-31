@@ -1,0 +1,12 @@
+{
+  "name": "love-letter",
+  "version": "1.0.0",
+  "description": "Site one-page romantique pour Marthe",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
