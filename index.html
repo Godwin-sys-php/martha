@@ -334,6 +334,145 @@
             margin-top: 2rem;
         }
 
+        /* Grille de photos stylisée */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 320px;
+        }
+
+        .photo-grid .photo {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .photo-grid .photo::after {
+            content: '♥';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2rem;
+            color: #e8b4b8;
+            opacity: 0.7;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .photo-grid .photo:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.2);
+            color: #d4878c;
+        }
+
+        .photo-grid .photo img {
+            width: 100%;
+            height: auto;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Rotations alternées pour le style */
+        .photo-grid .photo:nth-child(1) { transform: rotate(-3deg); }
+        .photo-grid .photo:nth-child(2) { transform: rotate(2deg); }
+        .photo-grid .photo:nth-child(3) { transform: rotate(2deg); }
+        .photo-grid .photo:nth-child(4) { transform: rotate(-2deg); }
+        .photo-grid .photo:nth-child(5) { transform: rotate(-2deg); }
+        .photo-grid .photo:nth-child(6) { transform: rotate(3deg); }
+
+        /* Hover */
+        .photo-grid .photo:hover {
+            transform: rotate(0deg) scale(1.08) translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            cursor: pointer;
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.4s ease;
+        }
+
+        .lightbox.active img {
+            transform: scale(1);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            font-size: 2.5rem;
+            color: #fff;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            font-family: sans-serif;
+            font-weight: 200;
+        }
+
+        .lightbox-close:hover {
+            opacity: 1;
+        }
+
+
+        /* Rendre toutes les images cliquables */
+        .image-placeholder {
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-placeholder:hover {
+            transform: scale(1.03);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Override pour les images avec offset */
+        .image-offset-left:hover {
+            transform: translateX(-30px) rotate(-2deg) scale(1.03);
+        }
+
+        .image-offset-right:hover {
+            transform: translateX(30px) rotate(2deg) scale(1.03);
+        }
+
         /* ============================================
            SECTION 6 - DÉCLARATION (Climax)
         ============================================ */
@@ -791,11 +930,14 @@
                     Tout ça, c'est nous. Et c'est précieux.
                 </p>
             </div>
-            <div class="fade-in delay-3 parallax-slow">
-                <!-- IMAGE 1 -->
-                <div class="image-placeholder img-portrait image-offset-right image-float">
-                    <img src="first.jpg" alt="Notre moment">
-                </div>
+            <!-- Grille de photos -->
+            <div class="photo-grid fade-in delay-3">
+                <div class="photo"><img src="first.jpg" alt="Notre moment"></div>
+                <div class="photo"><img src="first2.PNG" alt="Notre moment"></div>
+                <div class="photo"><img src="first3.jpg" alt="Notre moment"></div>
+                <div class="photo"><img src="first4.jpg" alt="Notre moment"></div>
+                <div class="photo"><img src="first5.jpg" alt="Notre moment"></div>
+                <div class="photo"><img src="first6.JPG" alt="Notre moment"></div>
             </div>
         </div>
     </section>
@@ -872,6 +1014,12 @@
             </div>
         </div>
     </section>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <img src="" alt="Image agrandie" id="lightboxImg">
+    </div>
 
     <!-- ============================================
          JAVASCRIPT - ANIMATIONS AU SCROLL
@@ -978,6 +1126,55 @@
 
         sections.forEach(section => {
             sectionObserver.observe(section);
+        });
+
+        // ============================================
+        // Lightbox - Affichage image agrandie
+        // ============================================
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxClose = document.querySelector('.lightbox-close');
+
+        // Ouvrir la lightbox
+        function openLightbox(src) {
+            lightboxImg.src = src;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Fermer la lightbox
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Event listeners - Grille de photos
+        document.querySelectorAll('.photo-grid .photo').forEach(photo => {
+            photo.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const img = photo.querySelector('img');
+                if (img) openLightbox(img.src);
+            });
+        });
+
+        // Event listeners - Images placeholder
+        document.querySelectorAll('.image-placeholder').forEach(placeholder => {
+            placeholder.addEventListener('click', (e) => {
+                const img = placeholder.querySelector('img');
+                if (img) openLightbox(img.src);
+            });
+        });
+
+        // Fermer
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+
+        // Clavier - Escape pour fermer
+        document.addEventListener('keydown', (e) => {
+            if (!lightbox.classList.contains('active')) return;
+            if (e.key === 'Escape') closeLightbox();
         });
     </script>
 
